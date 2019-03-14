@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 """
 Code for a Feed Forward Neural Network for the prediction of RSA and SS using
 frequency table of MSAs as features and RSA and SS as labels.
@@ -10,6 +11,7 @@ frequency table of MSAs as features and RSA and SS as labels.
 import numpy as np
 import re
 import os
+import glob
 
 #Function for creating the frequency matrix of amino acid pseudo counts for
 #each MSA.
@@ -50,5 +52,19 @@ def freqGenerator(filepath):
 #window that can be tuned by changing the corresponding variable.
 def featureGenerator(matrix, windowSize):
     
+    
+    
     return "Hello"
 
+#MAIN METHOD
+empty_files = []
+
+for filepath in glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/msa_alignments/*.hmmer"):
+    if os.stat(filepath).st_size == 0:
+        name = os.path.basename(filepath).partition("_")[0]
+        empty_files.append(name)
+    else:
+        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/freq_matrices")
+        freqGenerator(filepath)
+        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/feature_matrices")
+        featureGenerator(filepath)
