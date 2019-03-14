@@ -9,10 +9,11 @@ frequency table of MSAs as features and RSA and SS as labels.
 
 import numpy as np
 import re
+import os
 
 #Function for creating the frequency matrix of amino acid pseudo counts for
 #each MSA.
-def FreqMatrix(filepath):
+def freqGenerator(filepath):
 
     msa = open(filepath, "r")
     
@@ -39,12 +40,15 @@ def FreqMatrix(filepath):
     for i in range(0, col_size):
         for j in range(0, 20):
             freq_matrix[j, i] = freq_matrix[j, i]/(total_sum[i] + 20)
+            
+    name = os.path.basename(filepath).partition("_")[0] + "_freqmatrix.npy"
+    np.save(name, freq_matrix)
     
     return freq_matrix
 
 #Function for creating the feature matrix taking into consideration a sliding
 #window that can be tuned by changing the corresponding variable.
-def FeatureMatrix(FreqMatrix, SlidingWindow):
+def featureGenerator(matrix, windowSize):
     
     return "Hello"
 
