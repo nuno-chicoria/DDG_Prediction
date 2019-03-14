@@ -8,14 +8,15 @@ frequency table of MSAs as features and RSA and SS as labels.
 @author: nuno_chicoria
 """
 
-import numpy as np
-import re
-import os
 import glob
+import math
+import numpy as np
+import os
 import pickle
+import re
+import torch
 
-#Function for creating the frequency matrix of amino acid pseudo counts for
-#each MSA.
+#Function for creating the frequency matrix of amino acid pseudo counts for each MSA.
 def freqGenerator(filepath):
 
     msa = open(filepath, "r")
@@ -26,8 +27,7 @@ def freqGenerator(filepath):
         
     freq_matrix = np.ones((20, col_size))
 
-    aa_pos = ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M",
-              "F", "P", "S", "T", "W", "Y", "V"]
+    aa_pos = ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"]
 
     msa = open(filepath, "r")
     
@@ -43,32 +43,50 @@ def freqGenerator(filepath):
     for i in range(0, col_size):
         for j in range(0, 20):
             freq_matrix[j, i] = freq_matrix[j, i]/(total_sum[i] + 20)
-            
-    name = os.path.basename(filepath).partition("_")[0] + "_freqmatrix.npy"
-    np.save(name, freq_matrix)
     
     return freq_matrix
 
-#Function for creating the feature matrix taking into consideration a sliding
-#window that can be tuned by changing the corresponding variable.
-def featureGenerator(matrix, window_size):
+#Function for creating the feature matrix taking into consideration a sliding window that can be tuned by changing the corresponding variable.
+def featureGenerator(matrix, window_size, filepath):
     
+    feat_matrix = np.zeros((1, matrix.shape[1] * window_size))
     
+    frame = math.trunc(window_size/2)
     
-    return "Hello"
+    for i in range(matrix.shape[0]):
+        temp_row = np.zeros((1, matrix.shape[1] * window_size))
+        for slide in range(-frame, frame + 1):
+            if i + slide < 0:
+                temp_row = np.concatenate((temp_row, np.zeros((1, matrix.shape[1] * window_size))), axis = 1)
+            elif i + slide > matrix.shape[1]:
+                temp_row = np.concatenate((temp_row, np.zeros((1, matrix.shape[1] * window_size))), axis = 1)
+            else:
+                temp_row = np.concatenate((temp_row, matrix[:, i + slide].reshape(-1, 1)), axis = 1)
+        np.delete(temp_row, range(0, matrix.shape[1] * window_size), axis = 1)
+        feat_matrix = np.concatenate((feat_matrix, temp_row), axis = 0)
+        
+    np.delete(feat_matrix, 0, axis = 0)
+    
+    return feat_matrix
 
 #MAIN METHOD
 empty_files = []
 
 for filepath in glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/msa_alignments/*.hmmer"):
+    name = os.path.basename(filepath).partition("_")[0]
     if os.stat(filepath).st_size == 0:
         name = os.path.basename(filepath).partition("_")[0]
         empty_files.append(name)
     else:
         os.chdir("/Users/nuno_chicoria/Documents/master_thesis/freq_matrices")
-        freqGenerator(filepath)
+        freq_matrix = freqGenerator(filepath)
+        np.save(name + "_freqmatrix.npy", freq_matrix)
         os.chdir("/Users/nuno_chicoria/Documents/master_thesis/feature_matrices")
-        featureGenerator(filepath)
+        feat_matrix = featureGenerator(freq_matrix, 11, filepath)
+        np.save(name + "_featmatrix.npy", freq_matrix)
+        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/feature_tensors")
+        tensor = torch.from_numpy(feat_matrix)
+        torch.save(tensor, name + "_tensor.pt")
 
 os.chdir("/Users/nuno_chicoria/Documents/master_thesis/rsa_ss")
 pickle.dump(empty_files, open( "empty_list.p", "wb"))
