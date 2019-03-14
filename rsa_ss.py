@@ -12,6 +12,7 @@ import numpy as np
 import re
 import os
 import glob
+import pickle
 
 #Function for creating the frequency matrix of amino acid pseudo counts for
 #each MSA.
@@ -50,7 +51,7 @@ def freqGenerator(filepath):
 
 #Function for creating the feature matrix taking into consideration a sliding
 #window that can be tuned by changing the corresponding variable.
-def featureGenerator(matrix, windowSize):
+def featureGenerator(matrix, window_size):
     
     
     
@@ -68,3 +69,6 @@ for filepath in glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/msa_ali
         freqGenerator(filepath)
         os.chdir("/Users/nuno_chicoria/Documents/master_thesis/feature_matrices")
         featureGenerator(filepath)
+
+os.chdir("/Users/nuno_chicoria/Documents/master_thesis/rsa_ss")
+pickle.dump(empty_files, open( "empty_list.p", "wb"))
