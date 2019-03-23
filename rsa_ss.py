@@ -15,6 +15,7 @@ import os
 import pickle
 import re
 import torch
+from tqdm import tqdm
 
 #Function for creating the frequency matrix of amino acid pseudo counts for each MSA.
 def freqGenerator(filepath):
@@ -47,32 +48,30 @@ def freqGenerator(filepath):
     return freq_matrix
 
 #Function for creating the feature matrix taking into consideration a sliding window that can be tuned by changing the corresponding variable.
-def featureGenerator(matrix, window_size, filepath):
+def featureGenerator(matrix, window_size):
     
-    feat_matrix = np.zeros((1, matrix.shape[1] * window_size))
+    feat_matrix = np.zeros((1, 20 * window_size))
     
-    frame = math.trunc(window_size/2)
+    frame = math.trunc(window_size / 2)
     
-    for i in range(matrix.shape[0]):
-        temp_row = np.zeros((1, matrix.shape[1] * window_size))
+    for i in range(matrix.shape[1]):
+        temp_row = np.zeros((1, 1))
         for slide in range(-frame, frame + 1):
-            if i + slide < 0:
-                temp_row = np.concatenate((temp_row, np.zeros((1, matrix.shape[1] * window_size))), axis = 1)
-            elif i + slide > matrix.shape[1]:
-                temp_row = np.concatenate((temp_row, np.zeros((1, matrix.shape[1] * window_size))), axis = 1)
+            if (i + slide < 0) or (i + slide >= matrix.shape[1]):
+                temp_row = np.concatenate((temp_row, np.zeros((1, 20))), axis = 1)
             else:
-                temp_row = np.concatenate((temp_row, matrix[:, i + slide].reshape(-1, 1)), axis = 1)
-        np.delete(temp_row, range(0, matrix.shape[1] * window_size), axis = 1)
+                temp_row = np.concatenate((temp_row, matrix[:, i + slide].reshape(1, -1)), axis = 1)
+        temp_row = np.delete(temp_row, 0, axis = 1)
         feat_matrix = np.concatenate((feat_matrix, temp_row), axis = 0)
         
-    np.delete(feat_matrix, 0, axis = 0)
+    feat_matrix = np.delete(feat_matrix, 0, axis = 0)
     
     return feat_matrix
 
 #MAIN METHOD
 empty_files = []
 
-for filepath in glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/msa_alignments/*.hmmer"):
+for filepath in tqdm(glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/msa_alignments/*.hmmer")):
     name = os.path.basename(filepath).partition("_")[0]
     if os.stat(filepath).st_size == 0:
         name = os.path.basename(filepath).partition("_")[0]
@@ -80,13 +79,13 @@ for filepath in glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/msa_ali
     else:
         os.chdir("/Users/nuno_chicoria/Documents/master_thesis/freq_matrices")
         freq_matrix = freqGenerator(filepath)
-        np.save(name + "_freqmatrix.npy", freq_matrix)
+        np.save(name + ".npy", freq_matrix)
         os.chdir("/Users/nuno_chicoria/Documents/master_thesis/feature_matrices")
-        feat_matrix = featureGenerator(freq_matrix, 11, filepath)
-        np.save(name + "_featmatrix.npy", freq_matrix)
+        feat_matrix = featureGenerator(freq_matrix, 11)
+        np.save(name + ".npy", freq_matrix)
         os.chdir("/Users/nuno_chicoria/Documents/master_thesis/feature_tensors")
         tensor = torch.from_numpy(feat_matrix)
-        torch.save(tensor, name + "_tensor.pt")
+        torch.save(tensor, name + ".pt")
 
 os.chdir("/Users/nuno_chicoria/Documents/master_thesis/rsa_ss")
-pickle.dump(empty_files, open( "empty_list.p", "wb"))
+pickle.dump(empty_files, open( "empty_files.p", "wb"))
