@@ -69,4 +69,3 @@ class Neural_Network(nn.Module):
         # you can reload model with all the weights and so forth with:
         # torch.load("NN")
         
-#Something else
