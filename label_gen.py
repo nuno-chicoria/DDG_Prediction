@@ -4,7 +4,7 @@
 Code for a Feed Forward Neural Network for the prediction of RSA and SS using
 frequency table of MSAs as features and RSA and SS as labels.
 
-1. Label Matrix Generation
+2. Label Matrix Generation
 
 @author: nuno_chicoria
 """
