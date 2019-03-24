@@ -91,3 +91,4 @@ for filepath in tqdm(glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/ms
 
 os.chdir("/Users/nuno_chicoria/Documents/master_thesis/rsa_ss")
 pickle.dump(empty_files, open( "empty_files.p", "wb"))
+

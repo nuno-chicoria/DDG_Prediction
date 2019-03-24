@@ -45,3 +45,4 @@ for line in ss.readlines():
             else:
                 ss_matrix[i, 2] = 1
         np.save(name + ".npy", ss_matrix)
+
