@@ -5,8 +5,6 @@
 Code for a Feed Forward Neural Network for the prediction of RSA and SS using
 frequency table of MSAs as features and RSA and SS as labels.
 
-1. Feature Matrix Generation
-
 @author: nuno_chicoria
 """
 
@@ -14,6 +12,7 @@ import glob
 import math
 import numpy as np
 import os
+import pickle
 import re
 import torch
 from tqdm import tqdm
@@ -81,10 +80,12 @@ for filepath in tqdm(glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/ms
         os.chdir("/Users/nuno_chicoria/Documents/master_thesis/freq_matrices")
         freq_matrix = freqGenerator(filepath)
         np.save(name + ".npy", freq_matrix)
-        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/msa_matrices")
+        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/feature_matrices")
         feat_matrix = featureGenerator(freq_matrix, 11)
         np.save(name + ".npy", freq_matrix)
-        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/msa_tensors")
+        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/feature_tensors")
         tensor = torch.from_numpy(feat_matrix)
         torch.save(tensor, name + ".pt")
 
+os.chdir("/Users/nuno_chicoria/Documents/master_thesis/rsa_ss")
+pickle.dump(empty_files, open( "empty_files.p", "wb"))

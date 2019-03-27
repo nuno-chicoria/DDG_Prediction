@@ -11,9 +11,9 @@ frequency table of MSAs as features and RSA and SS as labels.
 
 import os
 import numpy as np
+import torch
 
 #For loop for the matrices regarding relative solvent accessibility
-os.chdir("/Users/nuno_chicoria/Documents/master_thesis/rsa_matrices")
 rsa = open("/Users/nuno_chicoria/Documents/master_thesis/rsa_ss/ACCpro.dssp.txt", "r")
 
 for line in rsa.readlines():
@@ -25,10 +25,13 @@ for line in rsa.readlines():
         for i in range(len(line)):
             if line[i] == "e":
                 rsa_matrix[i, 0] = 1
+        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/rsa_matrices")
         np.save(name + ".npy", rsa_matrix)
+        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/rsa_tensors")
+        tensor = torch.from_numpy(rsa_matrix)
+        torch.save(tensor, name + ".pt")
 
 #For loop for the matrices regarding secundary structure
-os.chdir("/Users/nuno_chicoria/Documents/master_thesis/ss_matrices")
 ss = open("/Users/nuno_chicoria/Documents/master_thesis/rsa_ss/SSpro.dssp.txt", "r")
 
 for line in ss.readlines():
@@ -44,5 +47,9 @@ for line in ss.readlines():
                 ss_matrix[i, 1] = 1
             else:
                 ss_matrix[i, 2] = 1
+        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/ss_matrices")
         np.save(name + ".npy", ss_matrix)
+        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/ss_tensors")
+        tensor = torch.from_numpy(ss_matrix)
+        torch.save(tensor, name + ".pt")
 
