@@ -83,7 +83,7 @@ for filepath in tqdm(glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/ms
         np.save(name + ".npy", freq_matrix)
         os.chdir("/Users/nuno_chicoria/Documents/master_thesis/msa_matrices")
         feat_matrix = featureGenerator(freq_matrix, 11)
-        np.save(name + ".npy", freq_matrix)
+        np.save(name + ".npy", feat_matrix)
         os.chdir("/Users/nuno_chicoria/Documents/master_thesis/msa_tensors")
         tensor = torch.from_numpy(feat_matrix)
         torch.save(tensor, name + ".pt")
