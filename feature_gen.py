@@ -24,7 +24,7 @@ def freqGenerator(filepath):
     msa = open(filepath, "r")
     
     for line in msa.readlines():
-        col_size = len(line)
+        col_size = len(line) - 1
         break
         
     freq_matrix = np.ones((20, col_size))
@@ -70,21 +70,14 @@ def featureGenerator(matrix, window_size):
     return feat_matrix
 
 #MAIN METHOD
-empty_files = []
 
-for filepath in tqdm(glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/msa_alignments/*.hmmer")):
+for filepath in tqdm(glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/datasets/msa/*.hmmer")):
     name = os.path.basename(filepath).partition("_")[0]
-    if os.stat(filepath).st_size == 0:
-        name = os.path.basename(filepath).partition("_")[0]
-        empty_files.append(name)
-    else:
-        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/freq_matrices")
+    if os.stat(filepath).st_size != 0:
+        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/msa_numpy")
         freq_matrix = freqGenerator(filepath)
-        np.save(name + ".npy", freq_matrix)
-        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/msa_matrices")
         feat_matrix = featureGenerator(freq_matrix, 11)
         np.save(name + ".npy", feat_matrix)
-        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/msa_tensors")
+        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/msa_tensor")
         tensor = torch.from_numpy(feat_matrix)
         torch.save(tensor, name + ".pt")
-
