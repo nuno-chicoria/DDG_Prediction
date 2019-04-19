@@ -1,132 +1,83 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 """
-Code for a Feed Forward Neural Network for the prediction of RSA and SS using
-frequency table of MSAs as features and RSA and SS as labels.
-
-3. Feed Forward Neural Network
+Created on Fri Apr 19 14:01:29 2019
 
 @author: nuno_chicoria
 """
 
 import glob
 import os
-from sklearn.model_selection import train_test_split
 import torch
 import torch.nn as nn
-
-msa = []
-X = []
-y = []
-
-for filepath in glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/files/msa_tensor/*.pt"):
-    name = os.path.basename(filepath).partition(".")[0]
-    msa.append(name)
-    temp = torch.load(filepath)
-    X.append(temp)
-
-for name in msa:
-    temp = torch.load("/Users/nuno_chicoria/Documents/master_thesis/files/rsa_tensor/%s.pt" % name)
-    y.append(temp)
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=0)
-
-batch_size = 1
-n_iters = 3000
-num_epochs = n_iters / (len(X_train) / batch_size)
-num_epochs = int(num_epochs)
-
-train_loader = torch.utils.data.DataLoader(dataset=X_train, 
-                                           batch_size=batch_size, 
-                                           shuffle=True)
-
-test_loader = torch.utils.data.DataLoader(dataset=X_test, 
-                                          batch_size=batch_size, 
-                                          shuffle=False)
+from torch.utils.data import Dataset, DataLoader
+ 
+class Dataset(Dataset):
+    
+    def __init__(self, X, y):
+        self.data = X
+        self.target = y
+        self.n_samples = len(self.data)
+    
+    def __len__(self):   # Length of the dataset.
+        return self.n_samples
+    
+    def __getitem__(self, index):   # Function that returns one point and one label.
+        return self.data[index], self.target[index]
 
 class FeedforwardNeuralNetModel(nn.Module):
+    
     def __init__(self, input_dim, hidden_dim, output_dim):
         super(FeedforwardNeuralNetModel, self).__init__()
-        # Linear function
         self.fc1 = nn.Linear(input_dim, hidden_dim) 
-
-        # Non-linearity
-        self.sigmoid = nn.Sigmoid()
-
-        # Linear function (readout)
+        self.relu = nn.ReLU()
         self.fc2 = nn.Linear(hidden_dim, output_dim)  
 
     def forward(self, x):
-        # Linear function  # LINEAR
         out = self.fc1(x)
-
-        # Non-linearity  # NON-LINEAR
-        out = self.sigmoid(out)
-
-        # Linear function (readout)  # LINEAR
+        out = self.relu.ReLU(out)
         out = self.fc2(out)
         return out
-    
-#NOT SURE ABOUT input_dim
-input_dim = 220*220
-hidden_dim = 100
-output_dim = 10
 
-model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
+#######################
+##### MAIN METHOD #####
+#######################
 
-criterion = nn.BCELoss()
-
+batch_size = 1
+input_dim = 220
+hidden_dim = 20
+output_dim = 1
 learning_rate = 0.1
 
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+file_names = []
+dataset = []
+rsa = []
+ss = []
 
-iter = 0
-for epoch in range(num_epochs):
-    for i, (images, labels) in enumerate(train_loader):
-        # Load images with gradient accumulation capabilities
-        images = images.view(-1, 28*28).requires_grad_()
+for filepath in glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/files/msa_tensor/*.pt"):
+    name = os.path.basename(filepath).partition(".")[0]
+    file_names.append(name)
+    temp = torch.load(filepath)
+    dataset.append(temp)
 
-        # Clear gradients w.r.t. parameters
+for name in file_names:
+    temp = torch.load("/Users/nuno_chicoria/Documents/master_thesis/files/rsa_tensor/%s.pt" % name)
+    rsa.append(temp)
+
+for name in file_names:
+    temp = torch.load("/Users/nuno_chicoria/Documents/master_thesis/files/ss_tensor/%s.pt" % name)
+    ss.append(temp)
+
+my_data = Dataset(dataset, ss)
+dataloader = DataLoader(my_data, batch_size = batch_size, shuffle = False, num_workers = 0)
+model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim)
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate, weight_decay = 1e-4)
+
+for epoch in range(5):
+    for i, (features, labels) in enumerate(dataloader):
         optimizer.zero_grad()
-
-        # Forward pass to get output/logits
-        outputs = model(images)
-
-        # Calculate Loss: softmax --> cross entropy loss
+        outputs = model(features)
         loss = criterion(outputs, labels)
-
-        # Getting gradients w.r.t. parameters
         loss.backward()
-
-        # Updating parameters
         optimizer.step()
-
-        iter += 1
-
-        if iter % 500 == 0:
-            # Calculate Accuracy         
-            correct = 0
-            total = 0
-            # Iterate through test dataset
-            for images, labels in test_loader:
-                # Load images with gradient accumulation capabilities
-                images = images.view(-1, 28*28).requires_grad_()
-
-                # Forward pass only to get logits/output
-                outputs = model(images)
-
-                # Get predictions from the maximum value
-                _, predicted = torch.max(outputs.data, 1)
-
-                # Total number of labels
-                total += labels.size(0)
-
-                # Total correct predictions
-                correct += (predicted == labels).sum()
-
-            accuracy = 100 * correct / total
-
-            # Print Loss
-            print('Iteration: {}. Loss: {}. Accuracy: {}'.format(iter, loss.item(), accuracy))
-            
