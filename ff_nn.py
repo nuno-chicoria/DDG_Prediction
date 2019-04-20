@@ -28,7 +28,7 @@ class Dataset(Dataset):
         return self.n_samples
     
     def __getitem__(self, index):
-        return torch.Tensor(self.data[index]), torch.Tensor(self.target[index])
+        return torch.Tensor(self.data[index]).type(torch.DoubleTensor), torch.Tensor(self.target[index]).type(torch.DoubleTensor)
 
 class FeedforwardNeuralNetModel(nn.Module):
     
@@ -44,21 +44,24 @@ class FeedforwardNeuralNetModel(nn.Module):
 # =============================================================================
 
 name = str
+#file = open("dataset.csv", "w+")
 batch_size = 100
 input_dim = 220
 hidden_dim = 20
 output_dim = 1
 learning_rate = 0.1
 
-for filepath in glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/files/msa_tensor/*.pt"):
-    name = os.path.basename(filepath).partition(".")[0]
-    msa = torch.load(filepath)
-    rsa_torch = torch.load("/Users/nuno_chicoria/Documents/master_thesis/files/rsa_tensor/%s.pt" % name).type(torch.LongTensor)
-    ss_torch = torch.load("/Users/nuno_chicoria/Documents/master_thesis/files/ss_tensor/%s.pt" % name).type(torch.LongTensor)
-    msa = np.concatenate((msa, rsa_torch), axis=1)
-    msa = np.concatenate((msa, ss_torch), axis=1)
-    with open("dataset.csv", "a") as file:
-        np.savetxt(file, msa, delimiter = ",")
+# =============================================================================
+# for filepath in glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/files/msa_numpy/*.npy"):
+#     name = os.path.basename(filepath).partition(".")[0]
+#     msa = np.load(filepath)
+#     rsa_torch = np.load("/Users/nuno_chicoria/Documents/master_thesis/files/rsa_numpy/%s.npy" % name)
+#     ss_torch = np.load("/Users/nuno_chicoria/Documents/master_thesis/files/ss_numpy/%s.npy" % name)
+#     msa = np.concatenate((msa, rsa_torch), axis=1)
+#     msa = np.concatenate((msa, ss_torch), axis=1)
+#     with open("dataset.csv", "a") as file:
+#         np.savetxt(file, msa, delimiter = ",")
+# =============================================================================
 
 print("Loading dataset")
 my_data = Dataset("dataset.csv")
