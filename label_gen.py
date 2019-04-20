@@ -53,3 +53,4 @@ for line in ss.readlines():
         os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/ss_tensor")
         tensor = torch.from_numpy(ss_matrix)
         torch.save(tensor, name + ".pt")
+

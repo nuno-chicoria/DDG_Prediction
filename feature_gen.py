@@ -81,3 +81,4 @@ for filepath in tqdm(glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/da
         os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/msa_tensor")
         tensor = torch.from_numpy(feat_matrix)
         torch.save(tensor, name + ".pt")
+
