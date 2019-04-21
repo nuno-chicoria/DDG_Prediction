@@ -11,6 +11,7 @@ frequency table of MSAs as features and RSA and SS as labels.
 """
 
 import os
+import glob
 import numpy as np
 import torch
 
@@ -54,3 +55,14 @@ for line in ss.readlines():
         tensor = torch.from_numpy(ss_matrix)
         torch.save(tensor, name + ".pt")
 
+file = open("dataset.csv", "w+")
+
+for filepath in glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/files/msa_numpy/*.npy"):
+    name = os.path.basename(filepath).partition(".")[0]
+    msa = np.load(filepath)
+    rsa_torch = np.load("/Users/nuno_chicoria/Documents/master_thesis/files/rsa_numpy/%s.npy" % name)
+    ss_torch = np.load("/Users/nuno_chicoria/Documents/master_thesis/files/ss_numpy/%s.npy" % name)
+    msa = np.concatenate((msa, rsa_torch), axis=1)
+    msa = np.concatenate((msa, ss_torch), axis=1)
+    with open("dataset.csv", "a") as file:
+        np.savetxt(file, msa, delimiter = ",")

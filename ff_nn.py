@@ -6,13 +6,13 @@ Created on Fri Apr 19 14:01:29 2019
 @author: nuno_chicoria
 """
 
-import glob
-import numpy as np
 import os
 import pandas as pd
-import torch
+import torch as t
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
+from torch.autograd import Variable
+
  
 os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/ff_nn")
 
@@ -20,66 +20,53 @@ class Dataset(Dataset):
     
     def __init__(self, filename):
         pd_data = pd.read_csv(filename).values
-        self.data = pd_data[:, 0:200]
-        self.target = pd_data[:, 220:]
-        self.n_samples = self.data.shape[0]
+        self.x = t.Tensor(pd_data[:, 0:220])
+        self.y_rsa = t.Tensor(pd_data[:, 220])
+        self.y_ss = t.Tensor(pd_data[:, 221:])
+        self.n_samples = self.x.shape[0]
     
     def __len__(self):
         return self.n_samples
     
     def __getitem__(self, index):
-        return torch.Tensor(self.data[index]).type(torch.DoubleTensor), torch.Tensor(self.target[index]).type(torch.DoubleTensor)
-
-class FeedforwardNeuralNetModel(nn.Module):
+        return self.x[index], self.y_rsa[index], self.y_ss[index]
     
-    def __init__(self, input_dim, hidden_dim, output_dim):
-        super(FeedforwardNeuralNetModel, self).__init__()
-        self.ff = nn.Sequential(nn.Linear(input_dim, hidden_dim), nn.ReLU(),
-                                nn.Linear(hidden_dim, output_dim), nn.Sigmoid())
+class FF_NN(nn.Module):
+    
+    def __init__(self):
+        super(FF_NN, self).__init__()
+        self.ff = nn.Sequential(nn.Linear(220, 100), nn.ReLU(), nn.Linear(100, 50), nn.ReLU())
+        self.rsa = nn.Sequential(nn.Linear(50, 1), nn.Sigmoid())
+        self.ss = nn.Sequential(nn.Linear(50, 3), nn.Softmax())
 
     def forward(self, x):
         out = self.ff(x)
-        return out
+        rsa = self.rsa(out)
+        ss = self.ss(out)	
+        return rsa, ss
 
-# =============================================================================
-
-name = str
-#file = open("dataset.csv", "w+")
-batch_size = 100
-input_dim = 220
-hidden_dim = 20
-output_dim = 1
-learning_rate = 0.1
-
-# =============================================================================
-# for filepath in glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/files/msa_numpy/*.npy"):
-#     name = os.path.basename(filepath).partition(".")[0]
-#     msa = np.load(filepath)
-#     rsa_torch = np.load("/Users/nuno_chicoria/Documents/master_thesis/files/rsa_numpy/%s.npy" % name)
-#     ss_torch = np.load("/Users/nuno_chicoria/Documents/master_thesis/files/ss_numpy/%s.npy" % name)
-#     msa = np.concatenate((msa, rsa_torch), axis=1)
-#     msa = np.concatenate((msa, ss_torch), axis=1)
-#     with open("dataset.csv", "a") as file:
-#         np.savetxt(file, msa, delimiter = ",")
 # =============================================================================
 
 print("Loading dataset")
-my_data = Dataset("dataset.csv")
+dataset = Dataset("dataset.csv")
 
 print("Preparing dataloader")
-dataloader = DataLoader(my_data, batch_size = batch_size, shuffle = True, num_workers = 0)
+dataloader = DataLoader(dataset, batch_size = int(len(dataset)/100), shuffle = True, sampler = None, num_workers = 0)
 
 print("Initialising neural network")
-model = FeedforwardNeuralNetModel(input_dim, hidden_dim, output_dim).double()
-criterion = nn.BCELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate, weight_decay = 1e-4)
+model = FF_NN()
+criterion_rsa = nn.BCELoss()
+criterion_ss = nn.MSELoss()
+optimizer = t.optim.Adam(model.parameters(), lr = 1e-2, weight_decay = 1)
 
-for epoch in range(5):
-    print("Current epoch: %s" % str(epoch + 1))
-    for i, (features, labels) in enumerate(dataloader):
+for epoch in range(100):
+    print("Epoch %s" % str(epoch + 1))
+    for sample in dataloader:
+        x, y_rsa, y_ss = sample
         optimizer.zero_grad()
-        outputs = model(features)
-        loss = criterion(outputs, labels)
-        loss.backward()
+        yprsa, ypss = model(Variable(x))
+        loss_rsa = criterion_rsa(yprsa, Variable(y_rsa))
+        loss_ss = criterion_ss(ypss, Variable(y_ss))
+        (loss_rsa + loss_ss).backward()
         optimizer.step()
         
