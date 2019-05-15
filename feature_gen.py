@@ -70,7 +70,6 @@ def featureGenerator(matrix, window_size):
     return feat_matrix
 
 #MAIN METHOD
-
 for filepath in tqdm(glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/datasets/msa/*.hmmer")):
     name = os.path.basename(filepath).partition("_")[0]
     if os.stat(filepath).st_size != 0:

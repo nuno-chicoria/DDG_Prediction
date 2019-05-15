@@ -55,6 +55,7 @@ for line in ss.readlines():
         tensor = torch.from_numpy(ss_matrix)
         torch.save(tensor, name + ".pt")
 
+#saving all as a dataset
 file = open("/Users/nuno_chicoria/Documents/master_thesis/files/ff_nn/dataset.csv", "w+")
 
 for filepath in glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/files/msa_numpy/*.npy"):
