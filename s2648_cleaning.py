@@ -52,3 +52,4 @@ for entry in B:
 f = open("_1.txt", "w+")
 for entry in _1:
     f.write(entry + ",")
+

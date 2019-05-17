@@ -15,7 +15,6 @@ import math
 import numpy as np
 import os
 import re
-import torch
 from tqdm import tqdm
 
 #Function for creating the frequency matrix of amino acid pseudo counts for each MSA.
@@ -29,7 +28,8 @@ def freqGenerator(filepath):
         
     freq_matrix = np.ones((20, col_size))
 
-    aa_pos = ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V"]
+    aa_pos = ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M",
+              "F", "P", "S", "T", "W", "Y", "V"]
 
     msa = open(filepath, "r")
     
@@ -70,14 +70,12 @@ def featureGenerator(matrix, window_size):
     return feat_matrix
 
 #MAIN METHOD
+os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/msa_7")
+
 for filepath in tqdm(glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/datasets/msa/*.hmmer")):
     name = os.path.basename(filepath).partition("_")[0]
     if os.stat(filepath).st_size != 0:
-        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/msa_numpy")
         freq_matrix = freqGenerator(filepath)
-        feat_matrix = featureGenerator(freq_matrix, 11)
+        feat_matrix = featureGenerator(freq_matrix, 7)
         np.save(name + ".npy", feat_matrix)
-        os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/msa_tensor")
-        tensor = torch.from_numpy(feat_matrix)
-        torch.save(tensor, name + ".pt")
-
+        
