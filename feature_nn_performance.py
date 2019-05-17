@@ -9,11 +9,20 @@ frequency table of MSAs as features and RSA and SS as labels.
 @author: nuno_chicoria
 """
 
+import torch as t
+from torch.autograd import Variable
 from sklearn.metrics import roc_curve, auc
 import matplotlib.pyplot as plt
 from itertools import cycle
 
-#import trainset, testset, model
+"""
+TO-DO
+1. import trainset, testset
+2. precision, balanced accuracy, specificity, sensitivity, ROC Curve (AUC),
+Matthews correlation coefficient (see which apply to binary and multi class)
+"""
+
+model = t.load("/Users/nuno_chicoria/Documents/master_thesis/files/ff_nn/rsa_ss_nn.pt")
 
 rsa_true = []
 rsa_pred = []

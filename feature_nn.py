@@ -20,7 +20,7 @@ from tqdm import tqdm
 
 os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/ff_nn")
 
-#class for dataset loading and calling
+#Xlass for dataset loading and calling
 class Dataset(Dataset):
     
     def __init__(self, filename):
@@ -36,7 +36,7 @@ class Dataset(Dataset):
     def __getitem__(self, index):
         return self.x[index], self.y_rsa[index], self.y_ss[index]
     
-#neural network class
+#Neural network class
 class Net(nn.Module):
     
     def __init__(self):
@@ -74,5 +74,6 @@ for epoch in tqdm(range(20)):
         (loss_rsa + loss_ss).backward()
         optimizer.step()
 
-#save trainset, testset, model
+
+t.save(model, "rsa_ss_nn.pt")
         

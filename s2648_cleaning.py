@@ -14,6 +14,7 @@ os.chdir("/Users/nuno_chicoria/Documents/master_thesis/datasets_others")
 
 s2648 = open("dataset_S2648.csv", "r")
 
+#Foor loop to index PDB entries by chain they use
 test_dict = {}
 for line in s2648.readlines():
         temp = re.split(",", line)
@@ -23,6 +24,7 @@ for line in s2648.readlines():
             test_dict[temp[0][4]] = []
             test_dict[temp[0][4]].append(temp[0][:4])
 
+#Sets for unique PDB IDs by chain
 C = set(test_dict["C"])
 A = set(test_dict["A"])
 U = set(test_dict["U"])
@@ -31,6 +33,7 @@ X = set(test_dict["X"])
 B = set(test_dict["B"])
 _1 = set(test_dict["1"])
 
+#Writing to file for usage in the PDB website to download sequences
 f = open("C.txt", "w+")
 for entry in C:
     f.write(entry + ",")
