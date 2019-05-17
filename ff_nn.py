@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Apr 19 14:01:29 2019
+Code for a Feed Forward Neural Network for the prediction of RSA and SS using
+frequency table of MSAs as features and RSA and SS as labels.
+
+3. Neural Network and Performance Evaluation
 
 @author: nuno_chicoria
 """
@@ -10,12 +13,13 @@ import os
 import pandas as pd
 import torch as t
 import torch.nn as nn
-from sklearn.metrics import confusion_matrix, roc_curve, roc_auc_score, classification_report, auc, matthews_corrcoef
+from sklearn.metrics import confusion_matrix, roc_curve, classification_report, auc, matthews_corrcoef
 from sklearn.model_selection import train_test_split
 from torch.autograd import Variable
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from itertools import cycle
 
 os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/ff_nn")
 
@@ -40,7 +44,8 @@ class Net(nn.Module):
     
     def __init__(self):
         super(Net, self).__init__()
-        self.ff = nn.Sequential(nn.Linear(220, 25), nn.ReLU(), nn.Linear(25, 10), nn.ReLU(), t.nn.Dropout(0.1))
+        self.ff = nn.Sequential(nn.Linear(220, 25), nn.ReLU(),
+                                nn.Linear(25, 10), nn.ReLU(), t.nn.Dropout(0.1))
         self.rsa = nn.Sequential(nn.Linear(10, 1), nn.Sigmoid())
         self.ss = nn.Sequential(nn.Linear(10, 3), nn.Softmax(dim = 0))
 
@@ -55,7 +60,7 @@ dataset = Dataset("dataset.csv")
 trainset, testset = train_test_split(dataset)
 
 trainloader = DataLoader(trainset, batch_size = int(len(trainset)/100))
-#testloader = DataLoader(testset, batch_size = 1)
+testloader = DataLoader(testset, batch_size = 1)
 
 criterion_rsa = nn.BCELoss(size_average=False)
 criterion_ss = nn.BCELoss(size_average=False)
@@ -78,43 +83,86 @@ rsa_pred = []
 ss_true = []
 ss_pred = []
         
-for i in range(len(testset)):
-    x, yrsa, yss = testset[i]
+for sample in testloader:
+    x, yrsa, yss = sample
+    yprsa, ypss = model(Variable(x))
+    break
     rsa_true.append(yrsa.numpy())
     ss_true.append(yss.numpy())
-    yprsa, ypss = model(Variable(x))
     rsa_pred.append(yprsa.detach().numpy())
     ss_pred.append(ypss.detach().numpy())
     
-fpr = dict()
-tpr = dict()
-roc_auc = dict()
-for i in range(2):
-    fpr[i], tpr[i], _ = roc_curve(rsa_true[i], rsa_pred[i])
-    roc_auc[i] = auc(fpr[i], tpr[i])
-    
+#RSA ROC Curve
+fpr, tpr, thresholds = roc_curve(rsa_true, rsa_pred)
+roc_auc = auc(fpr, tpr)
+
 plt.figure()
 lw = 2
-plt.plot(fpr[2], tpr[2], color='darkorange',
-         lw=lw, label='ROC curve (area = %0.2f)' % roc_auc[2])
+plt.plot(fpr, tpr, color='darkorange',
+         lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)
 plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
-plt.title('Receiver operating characteristic example')
+plt.title('RSA ROC Curve')
 plt.legend(loc="lower right")
 plt.show()
 
-#Precision is the ratio of correctly predicted positive observations to the total predicted positive observations
-#Recall is the ratio of correctly predicted positive observations to the all observations in actual class - yes
-#F1 Score is the weighted average of Precision and Recall. Therefore, this score takes both false positives and false negatives into account
+#SS ROC Curve
+ss_true_1 = []
+for i in range(len(ss_true)):
+    ss_true_1.append(ss_true[i][0])
+ss_true_2 = []
+for i in range(len(ss_true)):
+    ss_true_2.append(ss_true[i][1])
+ss_true_3 = []
+for i in range(len(ss_true)):
+    ss_true_3.append(ss_true[i][2])
+ss_pred_1 = []
+for i in range(len(ss_pred)):
+    ss_pred_1.append(ss_pred[i][0])
+ss_pred_2 = []
+for i in range(len(ss_pred)):
+    ss_pred_2.append(ss_pred[i][1])
+ss_pred_3 = []
+for i in range(len(ss_pred)):
+    ss_pred_3.append(ss_pred[i][2])
 
-#fpr, tpr, thresholds = roc_curve(rsa_true, rsa_pred)
+fpr1, tpr1, thresholds1 = roc_curve(ss_true_1, ss_pred_1)
+fpr2, tpr2, thresholds2 = roc_curve(ss_true_2, ss_pred_2)
+fpr3, tpr3, thresholds3 = roc_curve(ss_true_3, ss_pred_3)
+
+roc_auc1 = auc(fpr1, tpr1)
+roc_auc2 = auc(fpr2, tpr2)
+roc_auc3 = auc(fpr3, tpr3)
+
+fpr = [fpr1, fpr2, fpr3]
+tpr = [tpr1, tpr2, tpr3]
+roc_auc = [roc_auc1, roc_auc2, roc_auc3]
+
+plt.figure()
+colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
+for i, color in zip(range(3), colors):
+    plt.plot(fpr[i], tpr[i], color=color, lw=lw,
+             label='ROC curve of class {0} (area = {1:0.2f})'
+             ''.format(i, roc_auc[i]))
+
+plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('SS ROC Curve')
+plt.legend(loc="lower right")
+plt.show()
         
 #rsa_conf = confusion_matrix(rsa_true, rsa_pred)
 #rsa_report = classification_report(y_true = rsa_true, y_pred = rsa_pred)
 
+#ss_matthews = matthews_corrcoef(ss_true, ss_pred)
 #ss_conf = confusion_matrix(ss_true, ss_pred)
 #ss_report = classification_report(y_true = ss_true, y_pred = ss_pred)
+
+
 
