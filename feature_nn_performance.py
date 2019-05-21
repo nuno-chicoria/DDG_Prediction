@@ -16,10 +16,14 @@ import matplotlib.pyplot as plt
 from itertools import cycle
 
 """
-TO-DO
-1. import trainset, testset
-2. precision, balanced accuracy, specificity, sensitivity, ROC Curve (AUC),
-Matthews correlation coefficient (see which apply to binary and multi class)
+TODO
+precision
+balanced accuracy
+specificity
+sensitivity
+ROC Curve (AUC)
+Matthews correlation coefficient
+(see which apply to binary and multi class)
 """
 
 model = t.load("/Users/nuno_chicoria/Documents/master_thesis/files/ff_nn/rsa_ss_nn.pt")
@@ -43,9 +47,9 @@ roc_auc = auc(fpr, tpr)
 
 plt.figure()
 lw = 2
-plt.plot(fpr, tpr, color='darkorange',
-         lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)
-plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+plt.plot(fpr, tpr, color='darkorange', lw = lw,
+         label = f'ROC curve (area = {roc_auc:.2f})')
+plt.plot([0, 1], [0, 1], color = 'navy', lw = lw, linestyle = '--')
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
 plt.xlabel('False Positive Rate')
@@ -89,11 +93,9 @@ roc_auc = [roc_auc1, roc_auc2, roc_auc3]
 plt.figure()
 colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
 for i, color in zip(range(3), colors):
-    plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-             label='ROC curve of class {0} (area = {1:0.2f})'
-             ''.format(i, roc_auc[i]))
-
-plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+    plt.plot(fpr[i], tpr[i], color = color, lw = lw,
+             label = f'ROC curve of class {i} (area = {roc_auc[i]:.2f})')
+plt.plot([0, 1], [0, 1], 'k--', lw = lw)
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
 plt.xlabel('False Positive Rate')

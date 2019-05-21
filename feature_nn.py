@@ -18,16 +18,16 @@ from torch.autograd import Variable
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 
-os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/ff_nn")
+os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/rsa_ss_nn")
 
-#Xlass for dataset loading and calling
+# Class for dataset loading and calling
 class Dataset(Dataset):
     
     def __init__(self, filename):
         pd_data = pd.read_csv(filename).values
-        self.x = t.FloatTensor(pd_data[:, 0:220])
-        self.y_rsa = t.LongTensor(pd_data[:, 220])
-        self.y_ss = t.LongTensor(pd_data[:, 221:])
+        self.x = t.FloatTensor(pd_data[:, 0:300])
+        self.y_rsa = t.LongTensor(pd_data[:, 300])
+        self.y_ss = t.LongTensor(pd_data[:, 301:])
         self.n_samples = self.x.shape[0]
     
     def __len__(self):
@@ -36,12 +36,12 @@ class Dataset(Dataset):
     def __getitem__(self, index):
         return self.x[index], self.y_rsa[index], self.y_ss[index]
     
-#Neural network class
+# Neural network class
 class Net(nn.Module):
     
     def __init__(self):
         super(Net, self).__init__()
-        self.ff = nn.Sequential(nn.Linear(220, 100), nn.ReLU(),
+        self.ff = nn.Sequential(nn.Linear(300, 100), nn.ReLU(),
                                 nn.Linear(100, 10), nn.ReLU(), t.nn.Dropout(0.1))
         self.rsa = nn.Sequential(nn.Linear(10, 1), nn.Sigmoid())
         self.ss = nn.Sequential(nn.Linear(10, 3), nn.Softmax(dim = 0))
@@ -52,8 +52,9 @@ class Net(nn.Module):
         ss = self.ss(out)	
         return rsa, ss
     
-#MAIN METHOD
-dataset = Dataset("dataset.csv")
+# MAIN METHOD
+window_size = 15
+dataset = Dataset(f"dataset_{window_size}.csv")
 trainset, testset = train_test_split(dataset)
 
 trainloader = DataLoader(trainset, batch_size = int(len(trainset)/50))
@@ -73,7 +74,6 @@ for epoch in tqdm(range(20)):
         loss_ss = criterion_ss(ypss, Variable(yss).float())
         (loss_rsa + loss_ss).backward()
         optimizer.step()
-
 
 t.save(model, "rsa_ss_nn.pt")
         
