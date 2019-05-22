@@ -9,11 +9,11 @@ frequency table of MSAs as features and RSA and SS as labels.
 @author: nuno_chicoria
 """
 
-import torch as t
-from torch.autograd import Variable
-from sklearn.metrics import roc_curve, auc
-import matplotlib.pyplot as plt
 from itertools import cycle
+import numpy as np
+import matplotlib.pyplot as plt
+import sklearn.metrics as metrics
+from torch.autograd import Variable
 
 """
 TODO
@@ -26,8 +26,7 @@ Matthews correlation coefficient
 (see which apply to binary and multi class)
 """
 
-model = t.load("/Users/nuno_chicoria/Documents/master_thesis/files/ff_nn/rsa_ss_nn.pt")
-
+#Predictions
 rsa_true = []
 rsa_pred = []
 ss_true = []
@@ -42,8 +41,10 @@ for sample in testset:
     ss_pred.append(ypss.detach().numpy())
     
 #RSA ROC Curve
-fpr, tpr, thresholds = roc_curve(rsa_true, rsa_pred)
-roc_auc = auc(fpr, tpr)
+fpr, tpr, thresholds = metrics.roc_curve(rsa_true, rsa_pred)
+optimal_idx = np.argmax(np.abs(tpr - fpr))
+rsa_threshold = thresholds[optimal_idx]
+roc_auc = metrics.auc(fpr, tpr)
 
 plt.figure()
 lw = 2
@@ -57,6 +58,19 @@ plt.ylabel('True Positive Rate')
 plt.title('RSA ROC Curve')
 plt.legend(loc="lower right")
 plt.show()
+
+#Using the threshold
+rsa_binary = []
+for i in range(len(rsa_pred)):
+    if rsa_pred[i] >= rsa_threshold:
+        rsa_binary.append(1)
+    else:
+        rsa_binary.append(0)
+
+#RSA Metrics
+rsa_pres = metrics.precision_score(rsa_true, rsa_binary)
+rsa_bal_accu = metrics.balanced_accuracy_score(rsa_true, rsa_binary)
+rsa_matthews = metrics.matthews_corrcoef(rsa_true, rsa_binary)
 
 #SS ROC Curve
 ss_true_1 = []
@@ -78,13 +92,23 @@ ss_pred_3 = []
 for i in range(len(ss_pred)):
     ss_pred_3.append(ss_pred[i][2])
 
-fpr1, tpr1, thresholds1 = roc_curve(ss_true_1, ss_pred_1)
-fpr2, tpr2, thresholds2 = roc_curve(ss_true_2, ss_pred_2)
-fpr3, tpr3, thresholds3 = roc_curve(ss_true_3, ss_pred_3)
+fpr1, tpr1, thresholds1 = metrics.roc_curve(ss_true_1, ss_pred_1)
+optimal_idx1 = np.argmax(np.abs(tpr1 - fpr1))
+ss1_threshold = thresholds[optimal_idx1]
 
-roc_auc1 = auc(fpr1, tpr1)
-roc_auc2 = auc(fpr2, tpr2)
-roc_auc3 = auc(fpr3, tpr3)
+fpr2, tpr2, thresholds2 = metrics.roc_curve(ss_true_2, ss_pred_2)
+optimal_idx2 = np.argmax(np.abs(tpr2 - fpr2))
+ss2_threshold = thresholds[optimal_idx2]
+
+fpr3, tpr3, thresholds3 = metrics.roc_curve(ss_true_3, ss_pred_3)
+optimal_idx3 = np.argmax(np.abs(tpr3 - fpr3))
+ss3_threshold = thresholds[optimal_idx3]
+
+ss_threshold = (ss1_threshold + ss2_threshold + ss3_threshold) / 3
+
+roc_auc1 = metrics.auc(fpr1, tpr1)
+roc_auc2 = metrics.auc(fpr2, tpr2)
+roc_auc3 = metrics.auc(fpr3, tpr3)
 
 fpr = [fpr1, fpr2, fpr3]
 tpr = [tpr1, tpr2, tpr3]
@@ -104,11 +128,15 @@ plt.title('SS ROC Curve')
 plt.legend(loc="lower right")
 plt.show()
 
-#rsa_matthews = matthews_corrcoef(rsa_true, rsa_pred)
-#rsa_conf = confusion_matrix(rsa_true, rsa_pred)
-#rsa_report = classification_report(y_true = rsa_true, y_pred = rsa_pred)
+#SS Metrics
 
-#ss_matthews = matthews_corrcoef(ss_true, ss_pred)
-#ss_conf = confusion_matrix(ss_true, ss_pred)
-#ss_report = classification_report(y_true = ss_true, y_pred = ss_pred)
+
+
+
+
+
+
+
+
+
 
