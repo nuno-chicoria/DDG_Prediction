@@ -11,9 +11,9 @@ frequency table of MSAs as features and RSA and SS as labels.
 
 import os
 import pandas as pd
+from sklearn.model_selection import train_test_split
 import torch as t
 import torch.nn as nn
-from sklearn.model_selection import train_test_split
 from torch.autograd import Variable
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm

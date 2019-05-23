@@ -10,9 +10,9 @@ frequency table of MSAs as features and RSA and SS as labels.
 @author: nuno_chicoria
 """
 
-import os
 import glob
 import numpy as np
+import os
 from tqdm import tqdm
 
 # For loop for the matrices regarding relative solvent accessibility

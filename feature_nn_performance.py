@@ -10,8 +10,8 @@ frequency table of MSAs as features and RSA and SS as labels.
 """
 
 from itertools import cycle
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import sklearn.metrics as metrics
 from torch.autograd import Variable
 
@@ -26,7 +26,7 @@ Matthews correlation coefficient
 (see which apply to binary and multi class)
 """
 
-#Predictions
+# Predictions
 rsa_true = []
 rsa_pred = []
 ss_true = []
@@ -40,7 +40,7 @@ for sample in testset:
     rsa_pred.append(yprsa.detach().numpy())
     ss_pred.append(ypss.detach().numpy())
     
-#RSA ROC Curve
+# RSA ROC Curve
 fpr, tpr, thresholds = metrics.roc_curve(rsa_true, rsa_pred)
 optimal_idx = np.argmax(np.abs(tpr - fpr))
 rsa_threshold = thresholds[optimal_idx]
@@ -59,7 +59,7 @@ plt.title('RSA ROC Curve')
 plt.legend(loc="lower right")
 plt.show()
 
-#Using the threshold
+# Using the threshold
 rsa_binary = []
 for i in range(len(rsa_pred)):
     if rsa_pred[i] >= rsa_threshold:
@@ -67,12 +67,12 @@ for i in range(len(rsa_pred)):
     else:
         rsa_binary.append(0)
 
-#RSA Metrics
+# RSA Metrics
 rsa_pres = metrics.precision_score(rsa_true, rsa_binary)
 rsa_bal_accu = metrics.balanced_accuracy_score(rsa_true, rsa_binary)
 rsa_matthews = metrics.matthews_corrcoef(rsa_true, rsa_binary)
 
-#SS ROC Curve
+# SS ROC Curve
 ss_true_1 = []
 for i in range(len(ss_true)):
     ss_true_1.append(ss_true[i][0])
@@ -128,8 +128,8 @@ plt.title('SS ROC Curve')
 plt.legend(loc="lower right")
 plt.show()
 
-#Using the threshold and separating into 3 classes
-#35519 without any over threshold
+# Using the threshold and separating into 3 classes
+# 35519 without any over threshold
 ss_binary = []
 for i in range(len(ss_pred)):
     temp =[]
@@ -163,8 +163,8 @@ for i in range(len(ss_true)):
     ss3_true.append(ss_true[i][2])
     ss3_binary.append(ss_binary[i][2])
 
-#SS Metrics
-#https://scikit-learn.org/stable/modules/multiclass.html
+# SS Metrics
+# https://scikit-learn.org/stable/modules/multiclass.html
 ss1_pres = metrics.precision_score(ss1_true, ss1_binary)
 ss2_pres = metrics.precision_score(ss2_true, ss2_binary)
 ss3_pres = metrics.precision_score(ss3_true, ss3_binary)
