@@ -128,15 +128,52 @@ plt.title('SS ROC Curve')
 plt.legend(loc="lower right")
 plt.show()
 
+#Using the threshold and separating into 3 classes
+#35519 without any over threshold
+ss_binary = []
+for i in range(len(ss_pred)):
+    temp =[]
+    if ss_pred[i][0] >= ss1_threshold:
+        temp.append(1)
+    else:
+        temp.append(0)
+    if ss_pred[i][1] >= ss2_threshold:
+        temp.append(1)
+    else:
+        temp.append(0)
+    if ss_pred[i][2] >= ss3_threshold:
+        temp.append(1)
+    else:
+        temp.append(0)
+    ss_binary.append(temp)
+
+ss1_true = []
+ss1_binary = []
+for i in range(len(ss_true)):
+    ss1_true.append(ss_true[i][0])
+    ss1_binary.append(ss_binary[i][0])
+ss2_true = []
+ss2_binary = []
+for i in range(len(ss_true)):
+    ss2_true.append(ss_true[i][1])
+    ss2_binary.append(ss_binary[i][1])
+ss3_true = []
+ss3_binary = []
+for i in range(len(ss_true)):
+    ss3_true.append(ss_true[i][2])
+    ss3_binary.append(ss_binary[i][2])
+
 #SS Metrics
+#https://scikit-learn.org/stable/modules/multiclass.html
+ss1_pres = metrics.precision_score(ss1_true, ss1_binary)
+ss2_pres = metrics.precision_score(ss2_true, ss2_binary)
+ss3_pres = metrics.precision_score(ss3_true, ss3_binary)
 
+ss1_bal_accu = metrics.balanced_accuracy_score(ss1_true, ss1_binary)
+ss2_bal_accu = metrics.balanced_accuracy_score(ss2_true, ss2_binary)
+ss3_bal_accu = metrics.balanced_accuracy_score(ss3_true, ss3_binary)
 
-
-
-
-
-
-
-
-
+ss1_matthews = metrics.matthews_corrcoef(ss1_true, ss1_binary)
+ss2_matthews = metrics.matthews_corrcoef(ss2_true, ss2_binary)
+ss3_matthews = metrics.matthews_corrcoef(ss3_true, ss3_binary)
 
