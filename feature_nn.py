@@ -12,11 +12,11 @@ frequency table of MSAs as features and RSA and SS as labels.
 import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from skorch import NeuralNetClassifier
 import torch as t
 import torch.nn as nn
 from torch.autograd import Variable
 from torch.utils.data import Dataset, DataLoader
-from tqdm import tqdm
 
 os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/rsa_ss_nn")
 
@@ -41,10 +41,12 @@ class Net(nn.Module):
     
     def __init__(self):
         super(Net, self).__init__()
-        self.ff = nn.Sequential(nn.Linear(300, 100), nn.ReLU(),
+        self.ff = nn.Sequential(nn.Linear(300, 400), nn.ReLU(),
+                                nn.Linear(400, 250), nn.ReLU(),
+                                nn.Linear(250, 100), nn.ReLU(),
                                 nn.Linear(100, 10), nn.ReLU(), t.nn.Dropout(0.1))
         self.rsa = nn.Sequential(nn.Linear(10, 1), nn.Sigmoid())
-        self.ss = nn.Sequential(nn.Linear(10, 3), nn.Softmax(dim = 0))
+        self.ss = nn.Sequential(nn.Linear(10, 3), nn.Softmax(dim = 1))
 
     def forward(self, x):
         out = self.ff(x)
@@ -57,15 +59,31 @@ window_size = 15
 dataset = Dataset(f"dataset_{window_size}.csv")
 trainset, testset = train_test_split(dataset)
 
-trainloader = DataLoader(trainset, batch_size = int(len(trainset)/50))
+# =============================================================================
+# net = NeuralNetClassifier(
+#     Net,
+#     max_epochs=20,
+#     lr=0.1,
+#     optimizer = t.optim.Adam,
+#     criterion=nn.BCELoss,
+#     iterator_train__shuffle=False,
+# )
+# 
+# net.fit(dataset.x, dataset.y_rsa.float())
+# =============================================================================
 
-criterion_rsa = nn.BCELoss(size_average=False)
-criterion_ss = nn.BCELoss(size_average=False)
+trainloader = DataLoader(trainset, batch_size = int(len(trainset)/50))
+testloader = DataLoader(testset, batch_size = 1)
+
+criterion_rsa = nn.BCELoss(size_average = False)
+criterion_ss = nn.BCELoss(size_average = False)
 
 model = Net()
 optimizer = t.optim.Adam(model.parameters(), lr = 1e-2, weight_decay = 1)
 
-for epoch in tqdm(range(20)):
+rsa_loss = []
+ss_loss = []
+for epoch in range(20):
     for sample in trainloader:
         x, yrsa, yss = sample
         optimizer.zero_grad()
@@ -74,6 +92,8 @@ for epoch in tqdm(range(20)):
         loss_ss = criterion_ss(ypss, Variable(yss).float())
         (loss_rsa + loss_ss).backward()
         optimizer.step()
+    rsa_loss.append(loss_rsa)
+    ss_loss.append(loss_ss)
 
 t.save(model, "rsa_ss_nn.pt")
         

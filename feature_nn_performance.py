@@ -15,30 +15,19 @@ import numpy as np
 import sklearn.metrics as metrics
 from torch.autograd import Variable
 
-"""
-TODO
-precision
-balanced accuracy
-specificity
-sensitivity
-ROC Curve (AUC)
-Matthews correlation coefficient
-(see which apply to binary and multi class)
-"""
-
 # Predictions
 rsa_true = []
 rsa_pred = []
 ss_true = []
 ss_pred = []
         
-for sample in testset:
+for sample in testloader:
     x, yrsa, yss = sample
     yprsa, ypss = model(Variable(x))
-    rsa_true.append(yrsa.numpy())
-    ss_true.append(yss.numpy())
-    rsa_pred.append(yprsa.detach().numpy())
-    ss_pred.append(ypss.detach().numpy())
+    rsa_true.append(yrsa[0].numpy())
+    ss_true.append(yss[0].numpy())
+    rsa_pred.append(yprsa[0].detach().numpy())
+    ss_pred.append(ypss[0].detach().numpy())
     
 # RSA ROC Curve
 fpr, tpr, thresholds = metrics.roc_curve(rsa_true, rsa_pred)
@@ -68,9 +57,15 @@ for i in range(len(rsa_pred)):
         rsa_binary.append(0)
 
 # RSA Metrics
+rsa_accu = metrics.accuracy_score(rsa_true, rsa_binary)
 rsa_pres = metrics.precision_score(rsa_true, rsa_binary)
 rsa_bal_accu = metrics.balanced_accuracy_score(rsa_true, rsa_binary)
 rsa_matthews = metrics.matthews_corrcoef(rsa_true, rsa_binary)
+
+print(f"RSA accuracy: {rsa_accu}")
+print(f"RSA precision: {rsa_pres}")
+print(f"RSA balanced acuracy: {rsa_bal_accu}")
+print(f"RSA Matthews correlation coefficient: {rsa_matthews}")
 
 # SS ROC Curve
 ss_true_1 = []
@@ -114,11 +109,13 @@ fpr = [fpr1, fpr2, fpr3]
 tpr = [tpr1, tpr2, tpr3]
 roc_auc = [roc_auc1, roc_auc2, roc_auc3]
 
+labels = ["COIL", "STRAND", "HELIX"]
+
 plt.figure()
 colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
 for i, color in zip(range(3), colors):
     plt.plot(fpr[i], tpr[i], color = color, lw = lw,
-             label = f'ROC curve of class {i} (area = {roc_auc[i]:.2f})')
+             label = f'ROC curve of class {labels[i]} (area = {roc_auc[i]:.2f})')
 plt.plot([0, 1], [0, 1], 'k--', lw = lw)
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
@@ -131,20 +128,10 @@ plt.show()
 # Using the threshold and separating into 3 classes
 # 35519 without any over threshold
 ss_binary = []
-for i in range(len(ss_pred)):
-    temp =[]
-    if ss_pred[i][0] >= ss1_threshold:
-        temp.append(1)
-    else:
-        temp.append(0)
-    if ss_pred[i][1] >= ss2_threshold:
-        temp.append(1)
-    else:
-        temp.append(0)
-    if ss_pred[i][2] >= ss3_threshold:
-        temp.append(1)
-    else:
-        temp.append(0)
+for pred in ss_pred:
+    temp =[0, 0, 0]
+    index_max = np.argmax(pred)
+    temp[index_max] += 1
     ss_binary.append(temp)
 
 ss1_true = []
@@ -176,4 +163,8 @@ ss3_bal_accu = metrics.balanced_accuracy_score(ss3_true, ss3_binary)
 ss1_matthews = metrics.matthews_corrcoef(ss1_true, ss1_binary)
 ss2_matthews = metrics.matthews_corrcoef(ss2_true, ss2_binary)
 ss3_matthews = metrics.matthews_corrcoef(ss3_true, ss3_binary)
+
+print(f"SS precision: {ss1_pres}, {ss2_pres}, {ss3_pres}")
+print(f"SS balanced accuracy: {ss1_bal_accu}, {ss2_bal_accu}, {ss3_bal_accu}")
+print(f"SS Matthews correlation coefficient: {ss1_matthews}, {ss2_matthews}, {ss3_matthews}")
 
