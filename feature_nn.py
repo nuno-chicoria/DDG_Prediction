@@ -18,6 +18,7 @@ import torch as t
 import torch.nn as nn
 from torch.autograd import Variable
 from torch.utils.data import Dataset, DataLoader
+from tqdm import tqdm
 
 os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/rsa_ss_nn")
 
@@ -45,7 +46,7 @@ class Net(nn.Module):
         self.ff = nn.Sequential(nn.Linear(300, 100), nn.ReLU(),
                                 nn.Linear(100, 10), nn.ReLU(), t.nn.Dropout(0.1))
         self.rsa = nn.Sequential(nn.Linear(10, 1), nn.Sigmoid())
-        self.ss = nn.Sequential(nn.Linear(10, 3), nn.Softmax(dim = 1))
+        self.ss = nn.Sequential(nn.Linear(10, 3), nn.Softmax(dim = 0))
 
     def forward(self, x):
         out = self.ff(x)
@@ -56,6 +57,7 @@ class Net(nn.Module):
 # MAIN METHOD
 window_size = 15
 dataset = Dataset(f"dataset_{window_size}.csv")
+<<<<<<< HEAD
 cv = KFold(n_splits = 10, random_state = 42, shuffle=False)
 scores = []
 
@@ -88,6 +90,20 @@ for train_index, test_index in cv.split(dataset):
     ss_pred = []
         
     for sample in testloader:
+=======
+trainset, testset = train_test_split(dataset)
+
+trainloader = DataLoader(trainset, batch_size = int(len(trainset)/50))
+
+criterion_rsa = nn.BCELoss(size_average=False)
+criterion_ss = nn.BCELoss(size_average=False)
+
+model = Net()
+optimizer = t.optim.Adam(model.parameters(), lr = 1e-2, weight_decay = 1)
+
+for epoch in tqdm(range(20)):
+    for sample in trainloader:
+>>>>>>> parent of cfad5dc... 01.06.2019 (SoftMax & DataLoader Debugging)
         x, yrsa, yss = sample
         yprsa, ypss = model(Variable(x))
         rsa_true.append(yrsa[0].numpy())
