@@ -13,7 +13,6 @@ frequency table of MSAs as features and RSA and SS as labels.
 import glob
 import numpy as np
 import os
-from tqdm import tqdm
 
 # For loop for the matrices regarding relative solvent accessibility
 rsa = open("/Users/nuno_chicoria/Documents/master_thesis/datasets/rsa_ss/ACCpro.dssp.txt", "r")
@@ -54,7 +53,7 @@ os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/rsa_ss_nn/")
 window_size = 15
 file = open(f"dataset_{window_size}.csv", "w+")
 
-for filepath in tqdm(glob.iglob(f"/Users/nuno_chicoria/Documents/master_thesis/files/msa_{window_size}/*.npy")):
+for filepath in glob.iglob(f"/Users/nuno_chicoria/Documents/master_thesis/files/msa_{window_size}/*.npy"):
     name = os.path.basename(filepath).partition(".")[0]
     msa = np.load(filepath)
     rsa = np.load(f"/Users/nuno_chicoria/Documents/master_thesis/files/rsa_numpy/{name}.npy")

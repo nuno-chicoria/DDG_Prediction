@@ -15,7 +15,6 @@ import math
 import numpy as np
 import os
 import re
-from tqdm import tqdm
 
 # Function for creating the frequency matrix of amino acid pseudo counts for each MSA
 def FreqGenerator(filepath):
@@ -74,7 +73,7 @@ def FeatureGenerator(matrix, window_size):
 window_size = 15
 os.chdir(f"/Users/nuno_chicoria/Documents/master_thesis/files/msa_s2648")
 
-for filepath in tqdm(glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/datasets/s2648_msa/*.hmmer")):
+for filepath in glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/datasets/s2648_msa/*.hmmer"):
     name = os.path.basename(filepath).partition("_")[0]
     if os.stat(filepath).st_size != 0:
         freq_matrix = FreqGenerator(filepath)
