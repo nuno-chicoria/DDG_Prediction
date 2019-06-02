@@ -59,6 +59,7 @@ window_size = 15
 dataset = Dataset(f"dataset_{window_size}.csv")
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 cv = KFold(n_splits = 10, random_state = 42, shuffle=False)
 scores = []
 
@@ -92,6 +93,8 @@ for train_index, test_index in cv.split(dataset):
         
     for sample in testloader:
 =======
+=======
+>>>>>>> parent of cfad5dc... 01.06.2019 (SoftMax & DataLoader Debugging)
 =======
 >>>>>>> parent of cfad5dc... 01.06.2019 (SoftMax & DataLoader Debugging)
 trainset, testset = train_test_split(dataset)
