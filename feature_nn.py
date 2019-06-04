@@ -42,8 +42,8 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.ff = nn.Sequential(nn.Linear(300, 400), nn.ReLU(),
-                                nn.Linear(400, 250), nn.ReLU(),
-                                nn.Linear(250, 100), nn.ReLU(),
+                                nn.Linear(400, 200), nn.ReLU(),
+                                nn.Linear(200, 100), nn.ReLU(),
                                 nn.Linear(100, 10), nn.ReLU(), t.nn.Dropout(0.1))
         self.rsa = nn.Sequential(nn.Linear(10, 1), nn.Sigmoid())
         self.ss = nn.Sequential(nn.Linear(10, 3), nn.Softmax(dim = 1))
@@ -81,9 +81,7 @@ criterion_ss = nn.BCELoss(size_average = False)
 model = Net()
 optimizer = t.optim.Adam(model.parameters(), lr = 1e-2, weight_decay = 1)
 
-rsa_loss = []
-ss_loss = []
-for epoch in range(20):
+for epoch in range(10):
     for sample in trainloader:
         x, yrsa, yss = sample
         optimizer.zero_grad()
@@ -92,8 +90,6 @@ for epoch in range(20):
         loss_ss = criterion_ss(ypss, Variable(yss).float())
         (loss_rsa + loss_ss).backward()
         optimizer.step()
-    rsa_loss.append(loss_rsa)
-    ss_loss.append(loss_ss)
 
 t.save(model, "rsa_ss_nn.pt")
         

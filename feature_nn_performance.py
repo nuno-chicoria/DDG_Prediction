@@ -151,7 +151,10 @@ for i in range(len(ss_true)):
     ss3_binary.append(ss_binary[i][2])
 
 # SS Metrics
-# https://scikit-learn.org/stable/modules/multiclass.html
+ss1_accu = metrics.accuracy_score(ss1_true, ss1_binary)
+ss2_accu = metrics.accuracy_score(ss2_true, ss2_binary)
+ss3_accu = metrics.accuracy_score(ss3_true, ss3_binary)
+
 ss1_pres = metrics.precision_score(ss1_true, ss1_binary)
 ss2_pres = metrics.precision_score(ss2_true, ss2_binary)
 ss3_pres = metrics.precision_score(ss3_true, ss3_binary)
@@ -164,6 +167,7 @@ ss1_matthews = metrics.matthews_corrcoef(ss1_true, ss1_binary)
 ss2_matthews = metrics.matthews_corrcoef(ss2_true, ss2_binary)
 ss3_matthews = metrics.matthews_corrcoef(ss3_true, ss3_binary)
 
+print(f"SS accuracy: {ss1_accu}, {ss2_accu}, {ss3_accu}")
 print(f"SS precision: {ss1_pres}, {ss2_pres}, {ss3_pres}")
 print(f"SS balanced accuracy: {ss1_bal_accu}, {ss2_bal_accu}, {ss3_bal_accu}")
 print(f"SS Matthews correlation coefficient: {ss1_matthews}, {ss2_matthews}, {ss3_matthews}")
