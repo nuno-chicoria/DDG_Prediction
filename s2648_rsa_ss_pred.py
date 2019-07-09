@@ -41,7 +41,7 @@ for entry in rsa_pred:
 # Saving RSA information
 file = open("s2648_rsa.txt","w+")
 for i in range(len(name)):
-     file.write(">" + name[i][0:4] + ":" + name[i][4] + "\n")
+     file.write(">" + name[i][0:5] + "\n")
      file.write(rsa_binary[i] + "\n")
      
 # Converting SS to binary
@@ -57,7 +57,7 @@ for entry in ss_pred:
 # Saving SS information
 file = open("s2648_ss.txt","w+")
 for i in range(len(name)):
-     file.write(">" + name[i][0:4] + ":" + name[i][4] + "\n")
+     file.write(">" + name[i][0:5] + "\n")
      file.write(ss_binary[i] + "\n")
      
 pickle.dump(rsa_pred, open("rsa_pred.p", "wb"))
