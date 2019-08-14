@@ -4,6 +4,8 @@
 Code for cleaning and extracting all single PDB codes from the S2648 dataset
 for use in the MSA.
 
+5. S2648 Preparation
+
 @author: nuno_chicoria
 """
 

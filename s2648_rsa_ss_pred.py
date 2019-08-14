@@ -3,6 +3,8 @@
 """
 Code for the prediction of RSA and SS values for the unique entries of S2648 dataset
 
+6. RSA + SS Prediction of S2648
+
 @author: nuno_chicoria
 """
 
@@ -13,13 +15,14 @@ import pickle
 import torch as t
 from torch.autograd import Variable
 
-os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/s2648_rsa_ss")
+os.chdir("/Users/nuno_chicoria/Documents/master_thesis/files/p53_msa")
 
 name = []
 rsa_pred = []
 ss_pred = []
 
-for filepath in glob.iglob(f"/Users/nuno_chicoria/Documents/master_thesis/files/s2648_msa/*.npy"):
+#Prediction
+for filepath in glob.iglob(f"/Users/nuno_chicoria/Documents/master_thesis/files/p53_msa/*.npy"):
     msa = np.load(filepath)
     msa = t.from_numpy(msa).float()
     yprsa, ypss = model(Variable(msa))

@@ -72,9 +72,9 @@ def FeatureGenerator(matrix, window_size):
 
 #MAIN METHOD
 window_size = 15
-os.chdir(f"/Users/nuno_chicoria/Documents/master_thesis/files/s2648_msa")
+os.chdir(f"/Users/nuno_chicoria/Documents/master_thesis/files/p53_msa")
 
-for filepath in tqdm(glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/datasets/s2648_msa/*.hmmer")):
+for filepath in tqdm(glob.iglob("/Users/nuno_chicoria/Documents/master_thesis/datasets/p53_msa/*.hmmer")):
     name = os.path.basename(filepath).partition("_")[0]
     if os.stat(filepath).st_size != 0:
         freq_matrix = FreqGenerator(filepath)

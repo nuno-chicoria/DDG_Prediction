@@ -12,7 +12,7 @@ frequency table of MSAs as features and RSA and SS as labels.
 import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from skorch import NeuralNetClassifier
+#from skorch import NeuralNetClassifier
 import torch as t
 import torch.nn as nn
 from torch.autograd import Variable
