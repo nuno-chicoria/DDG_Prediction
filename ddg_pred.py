@@ -19,6 +19,7 @@ import sklearn.metrics as metrics
 from sklearn.model_selection import cross_val_score, train_test_split
 import matplotlib.pyplot as plt
 
+# Sequence dictionary preparation
 seq = open("/Users/nuno_chicoria/Documents/master_thesis/datasets_others/S2648/s2648_fasta.txt", "r")
 
 seq_dict = {}
@@ -31,6 +32,7 @@ for line in seq:
     else:
         seq_dict[name] += line.rstrip("\n")
 
+# RSA dictionary preparation
 rsa = open("/Users/nuno_chicoria/Documents/master_thesis/files/s2648_rsa_ss/s2648_rsa.txt", "r")
 
 rsa_dict = {}
@@ -43,6 +45,7 @@ for line in rsa:
     else:
         rsa_dict[name] += line.rstrip("\n")
 
+# SS dictionary preparation
 ss = open("/Users/nuno_chicoria/Documents/master_thesis/files/s2648_rsa_ss/s2648_ss.txt", "r")
 
 ss_dict = {}
@@ -54,7 +57,8 @@ for line in ss:
         ss_dict[name] = ""
     else:
         ss_dict[name] += line.rstrip("\n")
-        
+
+# Dataset import        
 dataset = pd.read_csv("/Users/nuno_chicoria/Documents/master_thesis/datasets_others/S2648/dataset_S2648.csv")
 
 X = []
@@ -65,6 +69,7 @@ skip = ["2A01A", "1AMQA", "1ZG4A", "2OCJA"] #1st is deprecrated, other mutations
 window_size = 5
 frame= math.trunc(window_size / 2)
 
+# X and y generator
 for a in range(len(dataset)):
     name = dataset["PDB_CHAIN"][a]
     temp_features = []
@@ -98,7 +103,8 @@ for a in range(len(dataset)):
         else:
             y_cat.append(1)
         y.append(dataset["EXP_DDG"][a])
-                
+
+# "Binarizing" the variables                
 for i in range(len(X)):
     for j in range(len(X[i])):
         if X[i][j]  == "e":
@@ -112,14 +118,13 @@ for i in range(len(X)):
         if X[i][j]  == "E":
             X[i][j] = 3
 
-clf = svm.SVC(C = 1, gamma = "auto")
-clf.fit(X, y_cat)
-#categorical
+
+# SVC analysis
 clf = svm.SVC(C = 1, gamma = "auto")
 scores = cross_val_score(clf, X, y_cat, cv = 10, scoring = "roc_auc")
 print(f"score: {st.mean(scores)}")
 
-#regression
+# SVR analysis
 clf = svm.SVR(gamma = 'auto', C = 1)
 r2 = cross_val_score(clf, X, y, scoring = "r2", cv = 10)
 mse = cross_val_score(clf, X, y, scoring = "neg_mean_squared_error", cv = 10)
@@ -127,7 +132,7 @@ exp_variance = cross_val_score(clf, X, y, scoring = "explained_variance", cv = 1
 print(f"r2: {st.mean(r2)}, mse: {st.mean(mse)}, var: {st.mean(exp_variance)}")
 
 
-#SVR
+#SVR Pearson Correlation Coefficient
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 clf = svm.SVR(gamma = 'auto', C = 1)
 clf.fit(X_train, y_train)
@@ -136,14 +141,7 @@ y_pred = clf.predict(X_test)
 corr, p_value = scipy.stats.pearsonr(y_pred, y_test)
 print(f"score: {corr}")
 
-# Plot
-plt.scatter(y_test, y_pred, alpha=0.5)
-plt.title('Scatter plot pythonspot.com')
-plt.xlabel('test')
-plt.ylabel('pred')
-plt.show()
-
-#PCA
+#PCA analysis
 pca = PCA(n_components = 1)
 principalComponents = np.concatenate(pca.fit_transform(X), axis = 0)
 corr, pvalue = scipy.stats.pearsonr(principalComponents, y)
